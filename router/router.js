@@ -202,7 +202,7 @@ router.get('/getCateDetail',CateController.detail)
 
 // 更新分类
 router.post('/updateCate',CateController.updateCate)
- 
+  
 // 给文章添加内容展示视图
 router.get('/editContent',ArticleController.editContent)
 
