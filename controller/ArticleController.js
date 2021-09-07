@@ -519,7 +519,7 @@ ArticleController.updateArtilceContent = async (req,res) => {
     res.json({
         code:20000,
         message:"编辑文章成功"
-    })
+    }) 
 }
 
 // 获取分页的时候
