@@ -211,5 +211,7 @@ router.post('/updateArtilceContent',ArticleController.updateArtilceContent)
 // 文章分页数据
 router.get('/articleCount',ArticleController.articleCount)
 
+router.get('/cateArticleCount',ArticleController.cateArticleCount)
+
 //导出模块
 module.exports = router;

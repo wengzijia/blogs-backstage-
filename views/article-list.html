@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <title>layout 管理系统大布局 - Layui</title>
   <link rel="stylesheet" href="/static/layui-v2.6.8/layui/css/layui.css">
+  <link rel="stylesheet" href="/static/plugins/lightbox/css/lightbox.css">
   <style>
     .c-gray {
       color: #ccc;
@@ -55,16 +56,19 @@
           <a href="/">首页</a>
           <a href="/article">文章列表</a>
         </span>
-        <!-- <div class="photo">
-          <button id="updAvatar" 	class="layui-btn layui-btn-primary layui-border-orange">更换头像</button>
-          <input type="file" id="avatarFile" style="display: none;">
-          <img src="{{userInfo.avatar}}" alt="" id="preview">
-        </div> -->
-        <div style="text-align:center;padding:30px;">
-          <button id="addBtn" class="layui-btn layui-btn-primary layui-border-blue">添加文章</button>
-          <a href="/recyclelist" class="layui-btn layui-btn-primary layui-border-orange">回收站列表</a>
-          <a href="/addImg" class="layui-btn layui-btn-primary layui-border-green">单文件上传</a>
-          <a href="javascript:;" onclick="logout()" class="layui-btn layui-btn-primary layui-border-red">退出</a>
+        
+        <div style="padding:15px;">
+          <div class="layui-input-inline" style="display: flex;">
+            <input style="width: 200px;" class="layui-input" type="text" id="title" placeholder="输入文章标题进行搜索">
+          
+            <select id="status" class="form-control" style="display: inline-block; width: 200px;">
+              <option value="">全部状态</option>
+              <option value="0">审核中</option>
+              <option value="1">通过</option>
+              <option value="2">失败</option>
+            </select>
+            <button  class="layui-btn" id="search">搜索</button>
+          </div>
         </div>
         <div>
           <table align="center" width="1300px" border="1px" rules="all"
@@ -98,10 +102,15 @@
 <script src="https://momentjs.bootcss.com/downloads/moment.min.js"></script>
 <script src="/static/js/jquery.js"></script>
 <script src="/static/layui-v2.6.8/layui/layui.js"></script>
+<script src="/static/plugins/lightbox/js/lightbox-plus-jquery.min.js"></script>
 <script>
   // 初始化分页
   let curr = 1;  // 起始页
-  let limit = 6; // 每页显示的条数
+  let limit = 2; // 每页显示的条数
+  let laypage;
+  let title;// 保存搜索的关键字
+  let status; // 保存搜索的姿态
+  let isSearch = false;
   let statusTextMap = {
     0: '<span class="layui-bg-orange">待审核</span>',
     1: '<span class="layui-bg-green">审核通过</span>',
@@ -109,8 +118,10 @@
   }
 
   // 发送ajax,获取分页的数据
-  function getArticleData(curr, limit, callback) {
-    $.get('/articleCount', { curr, limit }, function (res) {
+  function getArticleData(curr, limit, callback,where={}) {
+    // 合并查询参数
+    let params = Object.assign({curr,limit},where)
+    $.get('/articleCount',params, function (res) {
       callback && callback(res)
     }, 'json');
   }
@@ -137,7 +148,11 @@
               <td>${index}</td>
               <td>${title}</td>
               <td>${name}</td>
-              <td><img src="/${img}" width="50px" height="50px" style="border-radius:50%" alt=""></td>
+              <td>
+                <a href="/${img}" data-lightbox="preview" data-title="${title}">
+                <img src="/${img}" width="50px" height="50px" style="border-radius:50%" alt="">
+                </a>
+                </td>
               <td>${author}</td>
               <td>
                 <a href="/detail?id=${id}">查看详情</a>
@@ -172,17 +187,19 @@
       jump: function (obj, first) {
         // first第一次触发为true，后面都是undefined
         let { curr, limit } = obj;
+         // 如果是搜索，则取消默认请求
+         if(isSearch){return;}
         getArticleData(curr, limit, res => {
           // 渲染表格
           let tbody = renderTable(res.data)
           $("tbody").html(tbody);
-        })
+        },{title,status})
       }
     })
   }
 
   layui.use('laypage', function () {
-    var laypage = layui.laypage;
+    laypage = layui.laypage;
   
     // 请求完毕之后，在渲染分页
     // 加载分页数据和总记录数
@@ -298,6 +315,22 @@
       area: ['820px', '540px'], //宽高
       content: htmlStr
     });
+  })
+
+  // 实现搜索功能
+  $("#search").on('click',function(){
+    title = $("#title").val();
+    status = $("#status").val();
+    // 发送搜索请求
+    isSearch = true; // 说明点击了按钮
+    getArticleData(curr,limit,function(res){
+      let { count,data } = res;
+      // 重新渲染分页和表格数据
+      renderPage(laypage,'mypage',count,limit)
+      isSearch = false;
+      let tbody = renderTable(data)
+      $("tbody").html(tbody)
+    },{title,status})
   })
 </script>
 

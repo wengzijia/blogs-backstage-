@@ -18,6 +18,16 @@ let statusTextMap = {
     1: '<span class="c-green">审核通过</span>',
     2: '<span class="c-red">审核失败</span>'
 }
+
+// 统计出分类的文章总数
+ArticleController.cateArticleCount = async(req, res)=>{
+    let sql = `select
+	count(t1.id) as count,t1.cat_id,t2.name from article_table t1 left join classification t2 on t1.cat_id = t2.id
+group by t1.cat_id`
+    let result = await dbQueryPromise(sql);
+    res.json(result)
+}
+
 // 首页文章列表
 // ArticleController.index = (req, res) => {
 //     //判断是否有session权限
@@ -71,12 +81,12 @@ let statusTextMap = {
 //     })
 // }
 
-ArticleController.index = (req,res) =>{
+ArticleController.index = (req, res) => {
     // 取出session中的用户信息
     let userInfo = JSON.parse(req.session.userInfo || '{}');
 
     // 把查询出来的数据分配到模板引擎中
-    res.render('article-list.html',{
+    res.render('article-list.html', {
         userInfo
     })
 }
@@ -323,7 +333,7 @@ ArticleController.edit = (req, res) => {
         cats = row2
         // 因为查询数据库是异步操作，要等到所有的异步操作成功之后才可以渲染render模板页面
         res.render('edit.html', {
-            article,cats
+            article, cats
         })
     }
     ))
@@ -430,7 +440,7 @@ ArticleController.update = (req, res) => {
 ArticleController.recycle = (req, res) => {
     let { id = 0 } = req.query;
     $sql = `update article_table set is_delete = 1 where id = ${id}`;
-    dbQueryPromise($sql).then(result=> {
+    dbQueryPromise($sql).then(result => {
         let { affectedRows } = result;
         if (affectedRows) {
             res.redirect('/recyclelist')
@@ -507,37 +517,51 @@ ArticleController.detail = (req, res) => {
 }
 
 
-ArticleController.editContent = (req,res)=>{
+ArticleController.editContent = (req, res) => {
     let userInfo = JSON.parse(req.session.userInfo || '{}')
-    res.render('editContent.html',{userInfo})
+    res.render('editContent.html', { userInfo })
 }
 
-ArticleController.updateArtilceContent = async (req,res) => {
-    let {id,content} = req.body;
+ArticleController.updateArtilceContent = async (req, res) => {
+    let { id, content } = req.body;
     let sql = `update article_table set content = '${content}' where id = ${id}`;
     let result = await dbQueryPromise(sql);
     res.json({
-        code:20000,
-        message:"编辑文章成功"
-    })  
+        code: 20000,
+        message: "编辑文章成功"
+    })
 }
 
 // 获取分页的时候
-ArticleController.articleCount = async(req,res) => {
-    let { curr=1,limit = 10 } = req.query; // 1 10
+ArticleController.articleCount = async (req, res) => {
+    let { curr = 1, limit = 10, title, status } = req.query; // 1 10
+    // 判断是否有查询条件
+    let where = '';
+    if (title) {
+        where += ` and title like '%${title}%'`
+    }
+
+    if (status) {
+        where += ` and isverify = ${status}`
+    }
 
     // 查询文章总记录数
-    let sql = `select count(*) as count from article_table where is_delete = 0`;
-    let result = await dbQueryPromise(sql);
+    let sql = `select count(*) as count from article_table where 1 and is_delete = 0 ${where} `;
+    // let result = await dbQueryPromise(sql);
+    // console.log(result);
     let offset = (curr - 1) * limit;
     // 查询分页数据
     let sql2 = `select t1.*,t2.name from article_table as t1
     left join classification t2 on t1.cat_id = t2.id
-    where t1.is_delete = 0 order by t1.id desc limit ${offset},${limit}`;
-    let result2 = await dbQueryPromise(sql2);
+    where 1 and is_delete = 0 ${where} order by t1.id desc limit ${offset},${limit}`;
+    // let result2 = await dbQueryPromise(sql2);
+    // console.log(result2);
+    // 并行
+    let result = await Promise.all([dbQueryPromise(sql), dbQueryPromise(sql2)])
+    console.log(result); // [[{count:50}],[{},{},{}]]
     res.json({
-        count:result[0].count,
-        data:result2
+        count: result[0][0].count,
+        data: result[1]
     })
 }
 
