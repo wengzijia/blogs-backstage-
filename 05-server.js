@@ -3,12 +3,19 @@ const app = express();
 const path = require('path');
 const moment = require('moment');
 const fs = require('fs');
-const session = require("express-session")
+
 
 
 // 导入模板引擎模块
 const artTemplate = require('art-template');
 const express_template = require('express-art-template');
+
+// 挂载路由中间件
+const router = require('./router/router.js');
+const frontRouter = require("./router/frontRouter.js")
+
+let  authMiddleware = require('./middleware/auth.js');
+let  session =  require("./middleware/session.js");
 
 //配置模板的路径
 app.set('views', __dirname + '/views/');
@@ -17,16 +24,9 @@ app.engine('html', express_template);
 //设置视图引擎为上面的html
 app.set('view engine', 'html');
 
+
 //初始化session数据
-app.use(session({
-    name:'SESSIONID',  // session会话名称存储在cookie中的键名
-    secret:'%#%￥#……%￥', // 必填项，用户session会话加密（防止用户篡改cookie）
-    cookie:{  //设置session在cookie中的其他选项配置
-      path:'/',
-      secure:false,  //默认为false, true 只针对于域名https协议
-      maxAge:60000*24,  //设置有效期为24分钟，说明：24分钟内，不访问就会过期，如果24分钟内访问了。则有效期重新初始化为24分钟。
-    }
-  }));
+app.use(session);
 
 //设置托管静态资源中间件
 app.use('/uploads',express.static(path.join(__dirname , '/uploads')));
@@ -45,41 +45,21 @@ artTemplate.defaults.imports.dealDate = function(date,format = 'YYYY-MM-DD HH:mm
     return moment(date).format(format);
 }
 
-//设置中间件,统一校验session权限
-app.use((req,res,next)=>{
-    let {flag} = req.body;
-    // 有些路由需要放行,既不需要校验session权限,如/login,/logout
-    let path = req.path.toLowerCase(); // 转换为小写
-    let unPermissionPath = ['/login','/logout','/dologin','/ajaxlogin','/register','/ajaxregister','/ajaxemail']
-    if(!unPermissionPath.includes(path)){
-        // console.log(req);
-        // 不在放行内则需要校验
-        console.log(req.path,"session校验")
-        if(req.session.userInfo){
-            //权限正确
-            next();
-        }else{
-            //权限失败
-            if(flag === 'ajax'){
-                res.json({
-                    code:30004,
-                    message:"请重新登录"
-                })
-                return;
-            }else{
-                res.redirect('/login');
-                return;
-            }
-        }
-    }else{
-        //正常放行的路由
-        next();
-    }
+// 允许跨域请求
+app.use(function(req,res,next){
+    res.setHeader("Access-Control-Allow-Origin","*");
+    next()
 })
 
-//挂载路由中间件
-const router = require('./router/router.js');
+// 前台api接口(不需要验证session权限)
+app.use('/api',frontRouter)
 
+
+//设置中间件,统一校验session权限(仅针对后台)
+app.use(authMiddleware)
+
+
+// 后台路由中间件((需要验证session权限))
 app.use(router)
 
 
