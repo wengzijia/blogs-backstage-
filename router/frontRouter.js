@@ -39,6 +39,17 @@ router.get('/article',async(req,res)=>{
 })
 
 
+// 获取分类页面的文章
+router.get('/cateArticle',async(req,res)=>{
+    let {page=1,pagesize=2,cat_id} = req.query;
+    let offset = (page-1) * pagesize;
+    // console.log(cat_id);
+    let sql = `select t1.*,t2.name from article_table t1 left join classification t2 on t1.cat_id = t2.id 
+                where t1.cat_id = ${cat_id} and t1.is_delete =0 and t1.isverify = 1 limit ${offset},${pagesize}`;
+    let result = await query(sql);
+    res.json(result)
+})
+
 
 // 错误处理
  router.get('*',(req,res)=>{

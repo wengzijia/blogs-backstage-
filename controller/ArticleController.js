@@ -327,6 +327,7 @@ ArticleController.edit = (req, res) => {
     let cats = '';
     dbQueryPromise(sql1).then(rows1 => {
         article = rows1[0]
+        // console.log(article)
         let sql2 = "select * from classification"
         return dbQueryPromise(sql2)
     }).then((row2 => {
@@ -558,7 +559,7 @@ ArticleController.articleCount = async (req, res) => {
     // console.log(result2);
     // 并行
     let result = await Promise.all([dbQueryPromise(sql), dbQueryPromise(sql2)])
-    console.log(result); // [[{count:50}],[{},{},{}]]
+    // console.log(result); // [[{count:50}],[{},{},{}]]
     res.json({
         count: result[0][0].count,
         data: result[1]

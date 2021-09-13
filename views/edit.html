@@ -26,7 +26,7 @@
         <input type="hidden" id="id" name="id" value="">
         <input type="hidden" id="oldImg" name="oldImg" value="">
         <p>
-            标题： <input type="text" id="title" name="title" autocomplete="off">
+            标题： <input type="text" id="title" name="title" value="{{article.title}}" autocomplete="off">
         </p>
         <p>
             封面 <input type="file" name="img" id="cover" style="display: none;" autocomplete="off">
@@ -34,10 +34,10 @@
         </p>
         <p>
             封面预览：
-            <img src="" alt=""  width="160px" id="img">
+            <img src="{{article.img}}" alt=""  width="160px" id="img">
         </p>
         <p>
-            作者： <input type="text" id="author" name="author" autocomplete="off">
+            作者： <input type="text" id="author" name="author" value="{{article.author}}" autocomplete="off">
         </p>
         <p>
             审核：
@@ -56,7 +56,7 @@
         </p>
         <p>
             内容：
-            <textarea name="content" id="content" cols="30" rows="10"></textarea>
+            <textarea name="content" id="content" cols="30" rows="10">{{article.content}}</textarea>
         </p>
         <p>
             <button>确定更新</button>
@@ -65,6 +65,7 @@
 </body>
 <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.js"></script>
 <script>
+
     // 编辑文件
     let Picture = document.getElementById('picture');
     let Cover = document.getElementById('cover');
@@ -110,39 +111,11 @@
 
         selectEle.value = cat_id;
         idEle.value = id;
-    //    let option =  Array.from(options).find(item=> item.value == cat_id);
-    //     option.selected = true;
-        // console.log(input)
-        titleEle.value = "{{article.title}}";
-        authorEle.value = "{{article.author}}";
-        contentEle.value = "{{article.content}}";
-        oldImgEle.value = "{{article.img}}"
-        //回显预览图片
-        imgEle.src = "{{article.img}}"
+
+       
+     
     }
 
-    // // jQuery方式实现
-    // window.onload = function(){
-    //     let id = "{{article.id}}";
-    //     let status = "{{article.isverify}}";
-    //     let cat_id = "{{article.cat_id}}";
-
-    //     let input = [...$("input[name=status]")].find(item => item.value == status)
-    //     input.checked = true;
-    //     // let selectEle = $("#cat_id").val();
-    //     // let idEle = $("#id").val();
-    //     // let titleEle =  $("#title").val();
-    //     // let authorEle =  $("#author").val();
-    //     // let contentEle =  $("#content").val();
-    
-
-    //     $("#title").val("{{article.title}}") ;
-    //     $("#author").val("{{article.author}}");
-
-    //     $("#cat_id").val(cat_id);
-    //     $("#id").val(id)
-    //     $("#content").val("{{article.content}}");
-    // }
 </script>
 
 </html>
