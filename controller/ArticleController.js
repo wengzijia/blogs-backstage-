@@ -1,16 +1,16 @@
 // 文章控制器
-const mysql = require('mysql');
-const fs = require('fs')
-const path = require('path')
-
-const ArticleController = {}
-
+const mysql = require("mysql");
+const fs = require("fs")
+const path = require("path")
+ 
+const ArticleController = {} 
+ 
 // 导入模型
-const dbQuery = require('../model/query.js');
-const dbQueryPromise = require('../model/query-promise.js')
+const dbQuery = require("../model/query.js"); 
+const dbQueryPromise = require("../model/query-promise.js")
 
-const { getUnixTime } = require('../util/tool.js');
-const session = require('express-session');
+const { getUnixTime } = require("../util/tool.js");
+const session = require("express-session");
 
 // 只要是一种映射的数据关系，都可以用对象形式来简化if elseif
 let statusTextMap = {
@@ -83,10 +83,10 @@ group by t1.cat_id`
 
 ArticleController.index = (req, res) => {
     // 取出session中的用户信息
-    let userInfo = JSON.parse(req.session.userInfo || '{}');
+    let userInfo = JSON.parse(req.session.userInfo || "{}");
 
     // 把查询出来的数据分配到模板引擎中
-    res.render('article-list.html', {
+    res.render("article-list.html", {
         userInfo
     })
 }
@@ -109,7 +109,7 @@ ArticleController.index = (req, res) => {
 //         //3.把查询出来的数据分配到模板引擎中
 //         res.render('recycle.html', { article: data })
 //     })
-// }
+// } 
 
 ArticleController.recyclelist = (req, res) => {
     //1.编写sql语句
@@ -125,7 +125,7 @@ ArticleController.recyclelist = (req, res) => {
             return item
         })
         //3.把查询出来的数据分配到模板引擎中
-        res.render('recycle.html', { article: data })
+        res.render("recycle.html", { article: data })
     })
 }
 
@@ -156,14 +156,14 @@ ArticleController.delete = (req, res) => {
         if (result.affectedRows) {
             //删除文章的引用图片
             if (img) {
-                let oldpath = path.join(__dirname, '../', img)
+                let oldpath = path.join(__dirname, "../", img)
                 fs.unlink(oldpath, (err) => {
-                    console.log('删除成功')
+                    console.log("删除成功")
                 })
             }
-            res.redirect('/')
+            res.redirect("/")
         } else {
-            res.send('<script>alert("删除失败");location.href=' / ';</script>')
+            res.send('<script>alert("删除失败");location.href=' / ";</script>")
         }
     })
 }
@@ -202,9 +202,9 @@ ArticleController.ajaxdelete = (req, res) => {
         if (result.affectedRows) {
             //删除文章的引用图片
             if (img) {
-                let oldpath = path.join(__dirname, '../', img)
+                let oldpath = path.join(__dirname, "../", img)
                 fs.unlink(oldpath, (err) => {
-                    console.log('删除成功')
+                    console.log("删除成功")
                 })
             }
             res.json({
@@ -230,10 +230,10 @@ ArticleController.ajaxdelete = (req, res) => {
 // }
 
 ArticleController.add = (req, res) => {
-    let userInfo = JSON.parse(req.session.userInfo || '{}');
+    let userInfo = JSON.parse(req.session.userInfo || "{}");
     let sql = `select * from classification`;
     dbQueryPromise(sql).then(rows => {
-        res.render('addArticle.html', { cats: rows, userInfo })
+        res.render("addArticle.html", { cats: rows, userInfo })
     })
 }
 
@@ -269,15 +269,15 @@ ArticleController.add = (req, res) => {
 // }
 
 ArticleController.insert = (req, res) => {
-    console.log('req.file:', req.file)
+    console.log("req.file:", req.file)
     //判断是否有图片
-    let imgPath = '';
+    let imgPath = "";
     if (req.file) {
         let { originalname, filename } = req.file
-        let ext = originalname.substring(originalname.indexOf('.')); // .png
+        let ext = originalname.substring(originalname.indexOf(".")); // .png
         //把上传成功后的文件进行重命名
-        let oldPath = path.join(__dirname, '../', 'uploads', filename);
-        let newPath = path.join(__dirname, '../', 'uploads', filename) + ext;
+        let oldPath = path.join(__dirname, "../", "uploads", filename);
+        let newPath = path.join(__dirname, "../", "uploads", filename) + ext;
         //数据库记录存放的路径 
         imgPath = `uploads/${filename}${ext}`
         fs.renameSync(oldPath, newPath)
@@ -323,8 +323,8 @@ ArticleController.edit = (req, res) => {
     let { id } = req.query;
     //2.编写sql语句查询当前文章的数据分配给模板
     let sql1 = `select * from article_table where id=${id}`;
-    let article = '';
-    let cats = '';
+    let article = "";
+    let cats = "";
     dbQueryPromise(sql1).then(rows1 => {
         article = rows1[0]
         // console.log(article)
@@ -333,7 +333,7 @@ ArticleController.edit = (req, res) => {
     }).then((row2 => {
         cats = row2
         // 因为查询数据库是异步操作，要等到所有的异步操作成功之后才可以渲染render模板页面
-        res.render('edit.html', {
+        res.render("edit.html", {
             article, cats
         })
     }
@@ -391,10 +391,10 @@ ArticleController.update = (req, res) => {
     let imgPath;
     if (req.file) {
         let { originalname, filename } = req.file
-        let ext = originalname.substring(originalname.indexOf('.')); // .png
+        let ext = originalname.substring(originalname.indexOf(".")); // .png
         //把上传成功后的文件进行重命名
-        let oldPath = path.join(__dirname, '../', 'uploads', filename);
-        let newPath = path.join(__dirname, '../', 'uploads', filename) + ext;
+        let oldPath = path.join(__dirname, "../", "uploads", filename);
+        let newPath = path.join(__dirname, "../", "uploads", filename) + ext;
         //数据库记录存放的路径 
         imgPath = `uploads/${filename}${ext}`
         fs.renameSync(oldPath, newPath)
@@ -410,12 +410,12 @@ ArticleController.update = (req, res) => {
         if (result.affectedRows) {
             // 上传新图把原图删除掉
             if (req.file) {
-                let oldPath = path.join(__dirname, '../', oldImg)
+                let oldPath = path.join(__dirname, "../", oldImg)
                 fs.unlink(oldPath, (err) => {
 
                 })
             }
-            res.redirect('/article')
+            res.redirect("/article")
         } else {
             res.send('<script>alert("编辑失败");location.href="/";</script>')
         }
@@ -444,7 +444,7 @@ ArticleController.recycle = (req, res) => {
     dbQueryPromise($sql).then(result => {
         let { affectedRows } = result;
         if (affectedRows) {
-            res.redirect('/recyclelist')
+            res.redirect("/recyclelist")
         } else {
             res.send("<script>alert('加入失败');location.href='/';</script>")
         }
@@ -471,7 +471,7 @@ ArticleController.restore = (req, res) => {
     dbQueryPromise($sql).then(result => {
         let { affectedRows } = result;
         if (affectedRows) {
-            res.redirect('/')
+            res.redirect("/")
         } else {
             res.send("<script>alert('还原失败');location.href='/';</script>")
         }
@@ -480,7 +480,7 @@ ArticleController.restore = (req, res) => {
 
 //展示一个上传文件的表单
 ArticleController.addImg = (req, res) => {
-    res.render('addimg.html')
+    res.render("addimg.html")
 }
 
 
@@ -488,13 +488,13 @@ ArticleController.addImg = (req, res) => {
 ArticleController.upload = (req, res) => {
     console.log(req.file) // 接受二进制数据
     let { originalname, filename, destination } = req.file
-    let ext = originalname.substring(originalname.indexOf('.')); // .png
+    let ext = originalname.substring(originalname.indexOf(".")); // .png
     //把上传成功后的文件进行重命名
-    let oldPath = path.join(__dirname, '../', 'uploads', filename);
-    let newPath = path.join(__dirname, '../', 'uploads', filename) + ext;
+    let oldPath = path.join(__dirname, "../", "uploads", filename);
+    let newPath = path.join(__dirname, "../", "uploads", filename) + ext;
     fs.renameSync(oldPath, newPath)
     console.log(req.body) // 普通文本数据
-    res.send('upload sucess')
+    res.send("upload sucess")
 }
 
 // 文章详情查看
@@ -513,14 +513,14 @@ ArticleController.detail = (req, res) => {
     let sql = `select c1.*,c2.name from article_table c1  left join  classification  c2 on c1.cat_id = c2.id where c1.id = ${id}`;
     dbQueryPromise(sql).then(rows => {
         //渲染一个模板
-        res.render('detail.html', { article: rows[0] })
+        res.render("detail.html", { article: rows[0] })
     })
 }
 
 
 ArticleController.editContent = (req, res) => {
-    let userInfo = JSON.parse(req.session.userInfo || '{}')
-    res.render('editContent.html', { userInfo })
+    let userInfo = JSON.parse(req.session.userInfo || "{}")
+    res.render("editContent.html", { userInfo })
 }
 
 ArticleController.updateArtilceContent = async (req, res) => {
@@ -537,7 +537,7 @@ ArticleController.updateArtilceContent = async (req, res) => {
 ArticleController.articleCount = async (req, res) => {
     let { curr = 1, limit = 10, title, status } = req.query; // 1 10
     // 判断是否有查询条件
-    let where = '';
+    let where = "";
     if (title) {
         where += ` and title like '%${title}%'`
     }
