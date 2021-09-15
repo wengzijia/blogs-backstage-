@@ -1,14 +1,14 @@
-const { mode } = require("crypto-js");
-const  express = require("express");
+const { mode } = require('crypto-js');
+const  express = require('express');
 const router = express.Router();
 
 
 // 导入模型M
-const query = require("../model/query-promise.js");
+const query = require('../model/query-promise.js');
 
 
 // 获取所有的分类
-router.get("/cate",async (req,res)=>{
+router.get('/cate',async (req,res)=>{
     let sql = `select * from classification where int_show = 1`;
     let result = await query(sql);
     res.json(result)
@@ -16,7 +16,7 @@ router.get("/cate",async (req,res)=>{
 
 
 // 获取文章详情
-router.get("/detail",async(req,res)=>{
+router.get('/detail',async(req,res)=>{
     let { id } = req.query;
     id = parseInt(id); // id 转为整形
     id = isNaN(id) ? 0 : id; // 是否NaN,是的话取0,不是的话取id自己,这样的话就不会出错
@@ -27,7 +27,7 @@ router.get("/detail",async(req,res)=>{
 
 
 // 获取首页分页的文章
-router.get("/article",async(req,res)=>{
+router.get('/article',async(req,res)=>{
     let {page=1,pagesize=3} = req.query;
 
     // 起始位置: (当前页-1) * 每页显示的条数
@@ -40,7 +40,7 @@ router.get("/article",async(req,res)=>{
 
 
 // 获取分类页面的文章
-router.get("/cateArticle",async(req,res)=>{
+router.get('/cateArticle',async(req,res)=>{
     let {page=1,pagesize=2,cat_id} = req.query;
     let offset = (page-1) * pagesize;
     // console.log(cat_id);
@@ -49,10 +49,11 @@ router.get("/cateArticle",async(req,res)=>{
     let result = await query(sql);
     res.json(result)
 })
- 
- 
+
+
+
 // 错误处理
- router.get("*",(req,res)=>{
+ router.get('*',(req,res)=>{
      res.json({
          message:404
      })
